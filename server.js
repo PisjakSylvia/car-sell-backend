@@ -17,7 +17,7 @@ app.listen(port, () => {
 });
 
 const { Pool } = require('pg');
-
+// https://www.youtube.com/watch?v=cc-cSSsGqbA
 const pool = new Pool({
   user: 'willhaben-backend',
   host: 'localhost',
@@ -195,4 +195,25 @@ app.get('/api/cars-to-sell-with-image', (req, res) => {
       res.json(result.rows);
     }
   });
+});
+
+app.get('/api/messages/:senderID/:receiverID', (req, res) => {
+  const senderID = req.params.senderID;
+  const receiverID = req.params.receiverID;
+
+  pool.query(
+    `SELECT * FROM public.messages
+     WHERE ("senderID" = $1 AND "receiverID" = $2) 
+     OR ("senderID" = $2 AND "receiverID" = $1)
+     ORDER BY "time"`,
+    [senderID, receiverID],
+    (err, result) => {
+      if (err) {
+        console.error('Error executing query:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+      } else {
+        res.json(result.rows); 
+      }
+    }
+  );
 });
